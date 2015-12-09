@@ -25,12 +25,12 @@ public class Download {
 	public Torrent getTorrent() {return this.torrent;}
 	public boolean lastBlock() {return lastBlock;}
 	
-	public synchronized int getRemaining(int size) {
+	public synchronized int decRemaining(int size) {
 		remaining -= size;
 		return remaining;
 		}
 	
-	public synchronized int getDownloaded(int size) {
+	public synchronized int incDownloaded(int size) {
 		downloaded += size;
 		return downloaded;
 		}
@@ -72,13 +72,12 @@ public class Download {
 	public synchronized void resumeRemaining(int newRemaining){
 		remaining = newRemaining;
 	}
-	public void setLastBlock() {lastBlock = true;}
+	public void setLastBlock(boolean b) {lastBlock = b;}
 	
-	public synchronized int setTorrentFields(String event, int piecelen) {
+	public synchronized int setTorrentFields(int piecelen) {
 
-		int d = getDownloaded(piecelen);
-		int r = getRemaining(piecelen);
-		torrent.setEvent(event);
+		int d = incDownloaded(piecelen);
+		int r = decRemaining(piecelen);
 		torrent.setDownloaded(d);
 		torrent.setLeft(r);
 		

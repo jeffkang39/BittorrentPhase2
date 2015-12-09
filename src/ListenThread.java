@@ -39,7 +39,7 @@ public class ListenThread implements Runnable{
 		this.threadName = "listening thread";
 		this.ti = ti;
 		this.torrent = torrent;	
-		this.uploadList = new ArrayList<UploadThread>();
+		ListenThread.uploadList = new ArrayList<UploadThread>();
 		this.port = port;
 		this.serverSocket = new ServerSocket(port);
 		this.flag = true;
@@ -126,7 +126,7 @@ public class ListenThread implements Runnable{
 	public TorrentInfo getTorrentInfo() {return this.ti;}
 	public Torrent getTorrent() {return this.torrent;}
 	public Thread getThread() {return this.t;}
-	public ArrayList<UploadThread> getUploadList() {return this.uploadList;}
+	public ArrayList<UploadThread> getUploadList() {return ListenThread.uploadList;}
 	
 	// Set Method
 	public void setPort(int port) {this.port = port;}

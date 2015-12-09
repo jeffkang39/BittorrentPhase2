@@ -35,7 +35,11 @@ public class ThreadHandler {
 		for(int i = 0; i < threadList.size() ;i++){
 			DataInputStream dis = threadList.get(i).getDataInputStream();
 			DataOutputStream dos = threadList.get(i).getDataOutputStream();
+			System.out.println(threadList.size());
 			try {
+				System.out.println(i);
+				System.out.println(threadList.get(i).getThreadName());
+				
 				dis = new DataInputStream(threadList.get(i).getSocket().getInputStream());
 				dos = new DataOutputStream(threadList.get(i).getSocket().getOutputStream());
 				threadList.get(i).setDataInputStream(dis);

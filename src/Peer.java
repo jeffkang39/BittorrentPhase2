@@ -7,6 +7,7 @@
  * BitTorrent Client | Phase 1
  */
 
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -71,12 +72,13 @@ public class Peer {
 		}
 		
 		ToolKit.print(decoded_response);
-		
+
 		// Search through the list of peers and extract peers located at: 128.6.171.130, 128.6.171.131
 		ArrayList<HashMap<ByteBuffer, Object>> targetPeerList = new ArrayList<HashMap<ByteBuffer, Object>>();
 		ArrayList<Object> peerList = (ArrayList<Object>) decoded_response.get(PEERS);
 		for(int i = 0; i < peerList.size(); i++)
 		{
+			System.out.println(peerList);
 			HashMap<ByteBuffer, Object> eachPeer = (HashMap<ByteBuffer, Object>) peerList.get(i);
 			// Extract the target peer(s) located at IP Addresses: 128.6.171.130 and 128.6.171.131
 			String currPeerIP = objectBBToString(eachPeer.get(IP));
@@ -91,12 +93,8 @@ public class Peer {
 		// Declare variables for peer.
 		String peerIP = "";
 		int port = -1;
-		ByteBuffer BBPeerID = null;
-		String PeerID = null;
 		
 		peerIP = objectBBToString(peer.get(IP));
-		BBPeerID = (ByteBuffer) peer.get(PEER_ID);
-		PeerID = objectBBToString(peer.get(PEER_ID));
 		port = (int) peer.get(PORT);
 		
 		try {
@@ -193,5 +191,29 @@ public class Peer {
 			return false;
 		}
 		return true;
+	}
+	
+	public static byte[] getBitfield(Socket s, int hashesLength) throws IOException {
+		byte[] bitfield = null;
+		byte msgID;
+		
+		// Open IO Streams
+		DataInputStream input = new DataInputStream(s.getInputStream());
+
+		try {
+			input.readInt();
+			msgID = input.readByte();
+			if(msgID == ((byte) Message.BITFIELD)){
+				// Get Bitfield
+				bitfield = new byte[hashesLength];
+				System.out.println(input.read(bitfield, 0, 55));
+			} else {
+				System.out.println("ERROR: LOST A PEER MESSAGE");
+			}
+		} catch (IOException e){
+			System.out.println("Unable to read bitfield response.");
+		}
+		
+		return bitfield;
 	}
 }

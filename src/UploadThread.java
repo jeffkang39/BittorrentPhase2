@@ -15,7 +15,7 @@ public class UploadThread implements Runnable{
 	private Torrent torrent;
 	private DataInputStream dis;
 	private DataOutputStream dos;
-	private ListenThread LS;
+	//private ListenThread LS;
 	private int totalUploaded = 0;
 	private static boolean flag;
 	
@@ -23,8 +23,8 @@ public class UploadThread implements Runnable{
 		this.threadName = threadName;
 		this.socket = s;
 		this.torrent = torrent;
-		this.LS = LS;
-		this.flag = true;
+		//this.LS = LS;
+		UploadThread.flag = true;
 		try {
 			dis = new DataInputStream(socket.getInputStream());
 			dos = new DataOutputStream(socket.getOutputStream());
@@ -41,36 +41,39 @@ public class UploadThread implements Runnable{
 			sendHave(torrent, dos);
 			int peerMsgID = Message.readPeerMessage(dis);
 			// No message 
-			if (peerMsgID == -1) {
+			if (peerMsgID == Message.NO_MSG) {
 				System.out.println("No response from IP address: " + threadName);
 				System.out.println("Closing upload thread..");
 			}
 			// Interest
-			else if (peerMsgID == 2) {
+			else if (peerMsgID == Message.INTERESTED) {
 				System.out.println("Received INTEREST message by IP address: " + threadName);
 				
 				sendUnchoke();
-				while (this.flag == true) {
-					byte[] piece;
+				while (UploadThread.flag == true) {
 					// Wait and try to receive the requests.
 					peerMsgID = Message.readPeerMessage(dis);
-					if (peerMsgID == 6) {
+					if (peerMsgID == Message.REQUEST) {
 						int index = dis.readInt();
 						int begin = dis.readInt();
 						int length = dis.readInt();
 						
 						// Send requested piece.
+						
+						
 						System.out.println("Uploading requested piece to " + threadName + " at index: " + index + ", offset: " + begin);
 						if (sendPiece(index, begin, length)){
 							// Updates the torrent information for the tracker update.
 							int amtUploaded = torrent.getUploaded();
 							amtUploaded += length;
 							torrent.setUploaded(amtUploaded);
+							Message.guiThread.getGui().setUploaded(amtUploaded);
+							System.out.println("UPLOAD THREAD @@@@@@@@@@@@@@" + amtUploaded);
 						}
 						
 						// Update tracker with what you just uploaded
 					}
-					else if (peerMsgID == 3) {
+					else if (peerMsgID == Message.UNINTERESTED) {
 						System.out.println("NOT INTERESTED message received");
 						System.out.println("Closing upload thread..");
 						break;
@@ -83,7 +86,7 @@ public class UploadThread implements Runnable{
 				}
 			}
 			// Not interested
-			else if (peerMsgID == 3) {
+			else if (peerMsgID == Message.UNINTERESTED) {
 				System.out.println("Received NOT INTERESTED message by IP address: " + threadName);
 				System.out.println("Closing upload thread..");
 			}
